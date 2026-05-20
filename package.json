@@ -1,0 +1,45 @@
+{
+  "name": "eudora",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.1.3",
+  "engines": {
+    "node": ">=24.15.0",
+    "pnpm": ">=11.1.3"
+  },
+  "scripts": {
+    "corepack:shim": "corepack enable --install-directory ./node_modules/.bin",
+    "postinstall": "corepack enable --install-directory ./node_modules/.bin",
+    "dev": "corepack pnpm turbo run dev --parallel",
+    "build": "corepack pnpm turbo run build",
+    "lint": "corepack pnpm turbo run lint",
+    "typecheck": "corepack pnpm turbo run typecheck",
+    "test": "corepack pnpm turbo run test",
+    "dev:setup": "docker compose up -d postgres && corepack pnpm db:generate",
+    "dev:full": "corepack pnpm dev:setup && corepack pnpm dev",
+    "docker:start": "docker compose up -d --build postgres api web console",
+    "docker:stop": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:ps": "docker compose ps",
+    "db:generate": "corepack pnpm --filter @eudora/db db:generate",
+    "db:push": "corepack pnpm --filter @eudora/db db:push",
+    "db:migrate": "corepack pnpm --filter @eudora/db db:migrate",
+    "db:validate": "corepack pnpm --filter @eudora/db db:validate",
+    "openapi:generate": "corepack pnpm --filter @eudora/api openapi:generate",
+    "api-client:generate": "corepack pnpm --filter @eudora/api-client generate",
+    "api-client:check": "corepack pnpm --filter @eudora/api-client check",
+    "ci:check": "corepack pnpm db:generate && corepack pnpm db:validate && corepack pnpm openapi:generate && corepack pnpm api-client:generate && corepack pnpm -r run lint && corepack pnpm -r run typecheck && corepack pnpm -r run test && corepack pnpm -r run build && corepack pnpm api-client:check",
+    "ci:docker": "docker compose -f compose.yaml -f compose.ci.yaml up --build --abort-on-container-exit --exit-code-from check check"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.4",
+    "eslint": "9.39.4",
+    "eslint-config-prettier": "10.1.8",
+    "prettier": "3.8.3",
+    "turbo": "2.9.14",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.59.4",
+    "vitest": "3.2.4"
+  }
+}

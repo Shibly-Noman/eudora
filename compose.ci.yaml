@@ -1,0 +1,46 @@
+services:
+  check:
+    build:
+      context: .
+      dockerfile: docker/check.Dockerfile
+    working_dir: /workspace
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://eudora:eudora@postgres:5432/eudora?schema=public
+      API_PORT: "3001"
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      CI: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+      TURBO_TELEMETRY_DISABLED: "1"
+    volumes:
+      - .:/workspace
+      - check-node-modules:/workspace/node_modules
+      - check-api-node-modules:/workspace/apps/api/node_modules
+      - check-web-node-modules:/workspace/apps/web/node_modules
+      - check-console-node-modules:/workspace/apps/console/node_modules
+      - check-api-client-node-modules:/workspace/packages/api-client/node_modules
+      - check-config-node-modules:/workspace/packages/config/node_modules
+      - check-db-node-modules:/workspace/packages/db/node_modules
+      - check-turbo-cache:/workspace/.turbo
+      - pnpm-store:/pnpm/store
+    command: >
+      sh -lc "corepack enable &&
+      corepack pnpm config set store-dir /pnpm/store &&
+      rm -rf /workspace/node_modules/* /workspace/node_modules/.[!.]* /workspace/node_modules/..?* &&
+      corepack pnpm install --frozen-lockfile &&
+      corepack pnpm corepack:shim &&
+      export PATH=/workspace/node_modules/.bin:$$PATH &&
+      corepack pnpm ci:check"
+
+volumes:
+  check-node-modules:
+  check-api-node-modules:
+  check-web-node-modules:
+  check-console-node-modules:
+  check-api-client-node-modules:
+  check-config-node-modules:
+  check-db-node-modules:
+  check-turbo-cache:
+  pnpm-store:
