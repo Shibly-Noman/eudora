@@ -25,6 +25,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks"
 export function RoleAssignmentDialog({ user }: { user: UserSummary }) {
   const dispatch = useAppDispatch()
   const { items: roles, status } = useAppSelector((state) => state.rbac)
+  const isSaving = useAppSelector((state) => state.users.actionUserIds.includes(user.id))
   const [open, setOpen] = useState(false)
   const [selectedRoleKeys, setSelectedRoleKeys] = useState<string[]>(user.roleKeys)
 
@@ -46,22 +47,27 @@ export function RoleAssignmentDialog({ user }: { user: UserSummary }) {
     )
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    void dispatch(replaceUserRoles({ userId: user.id, roleKeys: selectedRoleKeys }))
-    setOpen(false)
+
+    try {
+      await dispatch(replaceUserRoles({ userId: user.id, roleKeys: selectedRoleKeys })).unwrap()
+      setOpen(false)
+    } catch {
+      // Slice state owns the user-facing error message.
+    }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline">
+        <Button size="sm" variant="outline" disabled={isSaving}>
           <ShieldCheck className="size-4" />
           Roles
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form className="space-y-5" onSubmit={(event) => void handleSubmit(event)}>
           <DialogHeader>
             <DialogTitle>Assign roles</DialogTitle>
             <DialogDescription>{user.email}</DialogDescription>
@@ -88,8 +94,8 @@ export function RoleAssignmentDialog({ user }: { user: UserSummary }) {
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={status === "loading"}>
-              Save roles
+            <Button type="submit" disabled={status === "loading" || isSaving}>
+              {isSaving ? "Saving..." : "Save roles"}
             </Button>
           </DialogFooter>
         </form>

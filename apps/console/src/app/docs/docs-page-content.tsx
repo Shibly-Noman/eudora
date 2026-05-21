@@ -1,6 +1,6 @@
 "use client"
 
-// PeakPixel API Documentation Page
+// Eudora API Documentation Page
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
@@ -65,7 +65,7 @@ const navSections: NavSection[] = [
   },
   {
     id: 'tracking-pixel',
-    title: 'Tracking Pixel',
+    title: 'EUDORA',
     icon: Image,
     items: [
       { id: 'pixel-create', title: 'Create', method: 'POST' },
@@ -349,7 +349,7 @@ export function DocsPageContent() {
             </Button>
             <Link href="/landing" className="flex items-center gap-2 cursor-pointer">
               <Logo size={28} />
-              <span className="font-bold text-lg">PeakPixel</span>
+              <span className="font-bold text-lg">Eudora</span>
             </Link>
             <Separator orientation="vertical" className="h-5 hidden sm:block" />
             <span className="hidden sm:block text-sm text-muted-foreground">API Documentation</span>
@@ -407,8 +407,8 @@ export function DocsPageContent() {
               </div>
 
               <p className="text-muted-foreground leading-relaxed mb-4">
-                Welcome to the official <strong className="text-foreground">PeakPixel API</strong> documentation.
-                In order to use the PeakPixel API you must have a{' '}
+                Welcome to the official <strong className="text-foreground">Eudora API</strong> documentation.
+                In order to use the Eudora API you must have a{' '}
                 <strong className="text-foreground">premium</strong> or{' '}
                 <strong className="text-foreground">early bird</strong> account. Feel free to check out our{' '}
                 <Link href="#pricing" className="text-primary underline underline-offset-4 hover:no-underline">
@@ -419,8 +419,8 @@ export function DocsPageContent() {
 
               <p className="text-muted-foreground leading-relaxed mb-4">
                 The latest version of the API is <Badge variant="outline">v1</Badge> currently. Using this API,
-                you are able to integrate PeakPixel into your own applications and automatically track mails.
-                This API allows you to create new mail trackings, tracking pixels and trackable URLs. We also
+                you are able to integrate Eudora into your own applications and automatically track mails.
+                This API allows you to create new mail trackings, EUDORAs and trackable URLs. We also
                 provide endpoints to delete your mail tracking or a trackable URL.
               </p>
 
@@ -435,9 +435,9 @@ export function DocsPageContent() {
                     dashboard.
                   </li>
                   <li>
-                    Add a <strong className="text-foreground">tracking pixel</strong> to your mail tracking. This
+                    Add a <strong className="text-foreground">EUDORA</strong> to your mail tracking. This
                     gives you a URL to embed as an image in your e-mails. Note: a mail tracking can only have{' '}
-                    <strong className="text-foreground">zero or one</strong> tracking pixel.
+                    <strong className="text-foreground">zero or one</strong> EUDORA.
                   </li>
                   <li>
                     Add up to <strong className="text-foreground">twenty trackable URLs</strong> to your mail
@@ -449,7 +449,7 @@ export function DocsPageContent() {
               <div className="grid sm:grid-cols-2 gap-4 mb-6">
                 <div className="rounded-lg border border-border p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Base URL</p>
-                  <code className="text-sm font-mono text-foreground">https://peakpixel.com/api/v1</code>
+                  <code className="text-sm font-mono text-foreground">https://Eudora.com/api/v1</code>
                 </div>
                 <div className="rounded-lg border border-border p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Rate Limit</p>
@@ -497,7 +497,7 @@ export function DocsPageContent() {
 
               <CodeBlock
                 language="bash"
-                code={`$ curl -X POST https://peakpixel.com/api/v1/mail-tracking?key=<KEY> \\
+                code={`$ curl -X POST https://Eudora.com/api/v1/mail-tracking?key=<KEY> \\
   -H "Content-type: application/json" \\
   -d '{"name":"Newsletter"}'`}
               />
@@ -557,7 +557,7 @@ export function DocsPageContent() {
 
             <p className="text-muted-foreground leading-relaxed mb-8">
               A <strong className="text-foreground">mail tracking</strong> is the entity with a name that can
-              &apos;own&apos; a tracking pixel and zero or more trackable URLs. All created mail trackings can be
+              &apos;own&apos; a EUDORA and zero or more trackable URLs. All created mail trackings can be
               seen on your dashboard.
             </p>
 
@@ -583,19 +583,19 @@ export function DocsPageContent() {
                   the mail tracking.
                 </AttrRow>
                 <AttrRow name="enabled" type="Boolean" defaultVal="true">
-                  Whether data collection is paused or not. When disabled, your tracking pixel and URLs
+                  Whether data collection is paused or not. When disabled, your EUDORA and URLs
                   won&apos;t collect any data. You can enable data tracking later on.
                 </AttrRow>
                 <AttrRow name="uniqueOpensOnly" type="Boolean" defaultVal="false">
                   Whether to collect only unique data. This is based on the IP-address of the tracked data, so
-                  a tracking pixel can then track an IP-address at most one time.{' '}
+                  a EUDORA can then track an IP-address at most one time.{' '}
                   <strong className="text-foreground">Important:</strong> If set to{' '}
                   <code className="bg-muted px-1 rounded">true</code>, then{' '}
                   <code className="bg-muted px-1 rounded">trackIpAddresses</code> must also be{' '}
                   <code className="bg-muted px-1 rounded">true</code>.
                 </AttrRow>
                 <AttrRow name="trackIpAddresses" type="Boolean" defaultVal="true">
-                  Privacy setting on whether the tracking pixel and URLs should track IP-addresses. When
+                  Privacy setting on whether the EUDORA and URLs should track IP-addresses. When
                   disabled, the mail tracking page also won&apos;t render the &quot;Location&quot; chart.{' '}
                   <strong className="text-foreground">This setting cannot be changed after creating the mail tracking.</strong>{' '}
                   When set to <code className="bg-muted px-1 rounded">false</code>,{' '}
@@ -603,12 +603,12 @@ export function DocsPageContent() {
                   <code className="bg-muted px-1 rounded">true</code>.
                 </AttrRow>
                 <AttrRow name="trackUserAgents" type="Boolean" defaultVal="true">
-                  Privacy setting on whether the tracking pixel and URLs should track user-agents. When
+                  Privacy setting on whether the EUDORA and URLs should track user-agents. When
                   disabled, the mail tracking page also won&apos;t render the &quot;Devices&quot; chart.{' '}
                   <strong className="text-foreground">This setting cannot be changed after creating the mail tracking.</strong>
                 </AttrRow>
                 <AttrRow name="trackDateTimes" type="Boolean" defaultVal="true">
-                  Privacy setting on whether the tracking pixel and URLs should track the date/times on which
+                  Privacy setting on whether the EUDORA and URLs should track the date/times on which
                   they got triggered. When disabled, the mail tracking page also won&apos;t show the &quot;Times
                   opened&quot; and &quot;Time of day&quot; charts.{' '}
                   <strong className="text-foreground">This setting cannot be changed after creating the mail tracking.</strong>
@@ -624,7 +624,7 @@ export function DocsPageContent() {
 
               <CodeBlock
                 language="bash"
-                code={`$ curl -X POST "https://peakpixel.com/api/v1/mail-tracking?key=<KEY>" \\
+                code={`$ curl -X POST "https://Eudora.com/api/v1/mail-tracking?key=<KEY>" \\
   -H "Content-type: application/json" \\
   -d '{"name":"Newsletter","enabled":true,"uniqueOpensOnly":false,"trackIpAddresses":true,"trackUserAgents":true,"trackDateTimes":true}'`}
               />
@@ -666,7 +666,7 @@ export function DocsPageContent() {
               <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside mb-4">
                 <li><code className="bg-muted px-1 rounded">id</code> — ID of the mail tracking</li>
                 <li><code className="bg-muted px-1 rounded">created</code> — timestamp of creation (ms since epoch)</li>
-                <li><code className="bg-muted px-1 rounded">mailTrackingUrl</code> — URL to the PeakPixel dashboard page</li>
+                <li><code className="bg-muted px-1 rounded">mailTrackingUrl</code> — URL to the Eudora dashboard page</li>
                 <li><code className="bg-muted px-1 rounded">name</code> — name of the mail tracking</li>
                 <li><code className="bg-muted px-1 rounded">enabled</code> — whether data collection is active</li>
                 <li><code className="bg-muted px-1 rounded">uniqueOpensOnly</code> — whether unique opens only are collected</li>
@@ -677,7 +677,7 @@ export function DocsPageContent() {
 
               <CodeBlock
                 language="bash"
-                code={`$ curl -X GET "https://peakpixel.com/api/v1/mail-tracking/465?key=<KEY>"`}
+                code={`$ curl -X GET "https://Eudora.com/api/v1/mail-tracking/465?key=<KEY>"`}
               />
 
               <JsonBlock
@@ -687,7 +687,7 @@ export function DocsPageContent() {
   "msg": {
     "id": 465,
     "created": 1611599175410,
-    "mailTrackingUrl": "https://peakpixel.com/tracking/465",
+    "mailTrackingUrl": "https://Eudora.com/tracking/465",
     "name": "Newsletter",
     "enabled": true,
     "uniqueOpensOnly": false,
@@ -700,7 +700,7 @@ export function DocsPageContent() {
       "id": 123,
       "created": 1611599175410,
       "token": "fbAQfWDabnHgQNwf4CFZ.png",
-      "url": "https://peakpixel.com/image/fbAQfWDabnHgQNwf4CFZ.png",
+      "url": "https://Eudora.com/image/fbAQfWDabnHgQNwf4CFZ.png",
       "timesOpened": 50
     },
     "trackableUrls": [
@@ -708,7 +708,7 @@ export function DocsPageContent() {
         "id": 756,
         "created": 1611599175410,
         "token": "fbAQfWDabnHgQNwf4Cqw",
-        "trackableUrl": "https://peakpixel.com/url/fbAQfWDabnHgQNwf4Cqw",
+        "trackableUrl": "https://Eudora.com/url/fbAQfWDabnHgQNwf4Cqw",
         "originalUrl": "https://my-website.com/",
         "timesOpened": 50
       }
@@ -743,7 +743,7 @@ export function DocsPageContent() {
 
               <CodeBlock
                 language="bash"
-                code={`$ curl -X DELETE "https://peakpixel.com/api/v1/mail-tracking/<ID>?key=<KEY>"`}
+                code={`$ curl -X DELETE "https://Eudora.com/api/v1/mail-tracking/<ID>?key=<KEY>"`}
               />
 
               <JsonBlock
@@ -758,18 +758,18 @@ export function DocsPageContent() {
             <Separator className="my-8" />
 
             {/* ════════════════════════════════════════════════════════════════
-                TRACKING PIXEL
+                EUDORA
             ════════════════════════════════════════════════════════════════ */}
             <div className="flex items-center gap-3 mb-8">
               <div className="p-2 rounded-lg bg-primary/10">
                 <Image className="h-5 w-5 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold tracking-tight">Tracking Pixel</h2>
+              <h2 className="text-2xl font-bold tracking-tight">EUDORA</h2>
             </div>
 
             <p className="text-muted-foreground leading-relaxed mb-8">
-              A <strong className="text-foreground">tracking pixel</strong> is the &apos;image&apos; that you
-              put in your sent e-mails. This pixel allows you to track your e-mail. A tracking pixel belongs to
+              A <strong className="text-foreground">EUDORA</strong> is the &apos;image&apos; that you
+              put in your sent e-mails. This pixel allows you to track your e-mail. A EUDORA belongs to
               one mail tracking and has a unique token.
             </p>
 
@@ -778,11 +778,11 @@ export function DocsPageContent() {
             <section className="mb-12">
               <div className="flex items-center gap-3 mb-4">
                 <MethodBadge method="POST" />
-                <h3 className="text-xl font-semibold">Create Tracking Pixel</h3>
+                <h3 className="text-xl font-semibold">Create EUDORA</h3>
               </div>
 
               <p className="text-muted-foreground leading-relaxed mb-4">
-                To create a new tracking pixel, send a <strong className="text-foreground">POST</strong> request
+                To create a new EUDORA, send a <strong className="text-foreground">POST</strong> request
                 to the endpoint below, where{' '}
                 <code className="bg-muted px-1.5 py-0.5 rounded text-sm">ID</code> is the ID of an existing
                 mail tracking that has <strong className="text-foreground">no pixel yet</strong>.
@@ -793,13 +793,13 @@ export function DocsPageContent() {
               <h4 className="font-semibold mb-3 mt-6">Returns</h4>
               <p className="text-muted-foreground text-sm mb-4">
                 Returns a <Badge variant="outline" className="text-green-600 dark:text-green-400">201 Created</Badge>{' '}
-                response with a JSON body containing the ID, unique token, and URL of the tracking pixel. Embed
+                response with a JSON body containing the ID, unique token, and URL of the EUDORA. Embed
                 this URL as an image in your outgoing e-mails.
               </p>
 
               <CodeBlock
                 language="bash"
-                code={`$ curl -X POST "https://peakpixel.com/api/v1/mail-tracking/123/pixel?key=<KEY>"`}
+                code={`$ curl -X POST "https://Eudora.com/api/v1/mail-tracking/123/pixel?key=<KEY>"`}
               />
 
               <JsonBlock
@@ -809,7 +809,7 @@ export function DocsPageContent() {
   "msg": {
     "id": 144,
     "token": "fbAQfWDabnHgQNwf4CFZ.png",
-    "url": "https://peakpixel.com/image/fbAQfWDabnHgQNwf4CFZ.png"
+    "url": "https://Eudora.com/image/fbAQfWDabnHgQNwf4CFZ.png"
   }
 }`}
               />
@@ -820,14 +820,14 @@ export function DocsPageContent() {
             <section className="mb-12">
               <div className="flex items-center gap-3 mb-4">
                 <MethodBadge method="GET" />
-                <h3 className="text-xl font-semibold">Get Tracking Pixel Information</h3>
+                <h3 className="text-xl font-semibold">Get EUDORA Information</h3>
               </div>
 
               <p className="text-muted-foreground leading-relaxed mb-4">
-                To retrieve information about a tracking pixel, send a{' '}
+                To retrieve information about a EUDORA, send a{' '}
                 <strong className="text-foreground">GET</strong> request to the endpoint below, where{' '}
                 <code className="bg-muted px-1.5 py-0.5 rounded text-sm">ID</code> is the ID of an existing
-                tracking pixel.
+                EUDORA.
               </p>
 
               <EndpointHeader method="GET" path="/pixel/<ID>" />
@@ -838,10 +838,10 @@ export function DocsPageContent() {
                 response with a JSON body containing:
               </p>
               <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside mb-4">
-                <li><code className="bg-muted px-1 rounded">id</code> — ID of the tracking pixel</li>
+                <li><code className="bg-muted px-1 rounded">id</code> — ID of the EUDORA</li>
                 <li><code className="bg-muted px-1 rounded">created</code> — timestamp of creation (ms since epoch)</li>
-                <li><code className="bg-muted px-1 rounded">token</code> — unique token of the tracking pixel</li>
-                <li><code className="bg-muted px-1 rounded">url</code> — image URL of the tracking pixel</li>
+                <li><code className="bg-muted px-1 rounded">token</code> — unique token of the EUDORA</li>
+                <li><code className="bg-muted px-1 rounded">url</code> — image URL of the EUDORA</li>
                 <li><code className="bg-muted px-1 rounded">timesOpened</code> — number of times triggered (excluding blacklisted IPs)</li>
                 <li><code className="bg-muted px-1 rounded">mailTrackingId</code> — ID of the parent mail tracking</li>
                 <li><code className="bg-muted px-1 rounded">mailTrackingUrl</code> — URL of the mail tracking dashboard</li>
@@ -849,7 +849,7 @@ export function DocsPageContent() {
 
               <CodeBlock
                 language="bash"
-                code={`$ curl -X GET "https://peakpixel.com/api/v1/pixel/123?key=<KEY>"`}
+                code={`$ curl -X GET "https://Eudora.com/api/v1/pixel/123?key=<KEY>"`}
               />
 
               <JsonBlock
@@ -860,10 +860,10 @@ export function DocsPageContent() {
     "id": 123,
     "created": 1611599175410,
     "token": "fbAQfWDabnHgQNwf4CFZ.png",
-    "url": "https://peakpixel.com/image/fbAQfWDabnHgQNwf4CFZ.png",
+    "url": "https://Eudora.com/image/fbAQfWDabnHgQNwf4CFZ.png",
     "timesOpened": 50,
     "mailTrackingId": 465,
-    "mailTrackingUrl": "https://peakpixel.com/tracking/465"
+    "mailTrackingUrl": "https://Eudora.com/tracking/465"
   }
 }`}
               />
@@ -874,14 +874,14 @@ export function DocsPageContent() {
             <section className="mb-16">
               <div className="flex items-center gap-3 mb-4">
                 <MethodBadge method="GET" />
-                <h3 className="text-xl font-semibold">Get Tracking Pixel Data</h3>
+                <h3 className="text-xl font-semibold">Get EUDORA Data</h3>
               </div>
 
               <p className="text-muted-foreground leading-relaxed mb-4">
-                To retrieve paginated tracked data collected by your tracking pixel, send a{' '}
+                To retrieve paginated tracked data collected by your EUDORA, send a{' '}
                 <strong className="text-foreground">GET</strong> request to the endpoint below.{' '}
                 <code className="bg-muted px-1.5 py-0.5 rounded text-sm">ID</code> is the ID of an existing
-                tracking pixel. Data is sorted from <strong className="text-foreground">new to old</strong>, so
+                EUDORA. Data is sorted from <strong className="text-foreground">new to old</strong>, so
                 the first record is the most recent.
               </p>
 
@@ -914,7 +914,7 @@ export function DocsPageContent() {
 
               <CodeBlock
                 language="bash"
-                code={`$ curl -X GET "https://peakpixel.com/api/v1/pixel/123/data?offset=3&limit=50&key=<KEY>"`}
+                code={`$ curl -X GET "https://Eudora.com/api/v1/pixel/123/data?offset=3&limit=50&key=<KEY>"`}
               />
 
               <JsonBlock
@@ -957,7 +957,7 @@ export function DocsPageContent() {
 
             <p className="text-muted-foreground leading-relaxed mb-8">
               A <strong className="text-foreground">trackable URL</strong> is a URL that you can track, just
-              like tracking pixels. Whenever someone opens the URL it redirects to the website you have entered.
+              like EUDORAs. Whenever someone opens the URL it redirects to the website you have entered.
               A mail tracking can have up to <strong className="text-foreground">20 trackable URLs</strong>.
             </p>
 
@@ -995,7 +995,7 @@ export function DocsPageContent() {
 
               <CodeBlock
                 language="bash"
-                code={`$ curl -X POST "https://peakpixel.com/api/v1/mail-tracking/4/url?key=<KEY>" \\
+                code={`$ curl -X POST "https://Eudora.com/api/v1/mail-tracking/4/url?key=<KEY>" \\
   -H "Content-type: application/json" \\
   -d '{"url":"https://mywebsite.com/"}'`}
               />
@@ -1007,7 +1007,7 @@ export function DocsPageContent() {
   "msg": {
     "id": 235,
     "token": "ZHMhkAbySWXFQqdpB7PQ",
-    "trackableUrl": "https://peakpixel.com/url/ZHMhkAbySWXFQqdpB7PQ",
+    "trackableUrl": "https://Eudora.com/url/ZHMhkAbySWXFQqdpB7PQ",
     "originalUrl": "https://mywebsite.com/"
   }
 }`}
@@ -1049,7 +1049,7 @@ export function DocsPageContent() {
 
               <CodeBlock
                 language="bash"
-                code={`$ curl -X GET "https://peakpixel.com/api/v1/url/756?key=<KEY>"`}
+                code={`$ curl -X GET "https://Eudora.com/api/v1/url/756?key=<KEY>"`}
               />
 
               <JsonBlock
@@ -1060,11 +1060,11 @@ export function DocsPageContent() {
     "id": 756,
     "created": 1611599175410,
     "token": "fbAQfWDabnHgQNwf4Cqw",
-    "trackableUrl": "https://peakpixel.com/url/fbAQfWDabnHgQNwf4Cqw",
+    "trackableUrl": "https://Eudora.com/url/fbAQfWDabnHgQNwf4Cqw",
     "originalUrl": "https://my-website.com/",
     "timesOpened": 89,
     "mailTrackingId": 465,
-    "mailTrackingUrl": "https://peakpixel.com/tracking/465"
+    "mailTrackingUrl": "https://Eudora.com/tracking/465"
   }
 }`}
               />
@@ -1114,7 +1114,7 @@ export function DocsPageContent() {
 
               <CodeBlock
                 language="bash"
-                code={`$ curl -X GET "https://peakpixel.com/api/v1/url/756/data?offset=0&limit=10&key=<KEY>"`}
+                code={`$ curl -X GET "https://Eudora.com/api/v1/url/756/data?offset=0&limit=10&key=<KEY>"`}
               />
 
               <JsonBlock
@@ -1168,7 +1168,7 @@ export function DocsPageContent() {
 
               <CodeBlock
                 language="bash"
-                code={`$ curl -X DELETE "https://peakpixel.com/api/v1/url/235?key=<KEY>"`}
+                code={`$ curl -X DELETE "https://Eudora.com/api/v1/url/235?key=<KEY>"`}
               />
 
               <JsonBlock
@@ -1185,7 +1185,7 @@ export function DocsPageContent() {
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-8 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Logo size={20} />
-                <span>PeakPixel API Documentation</span>
+                <span>Eudora API Documentation</span>
                 <Badge variant="outline">v1</Badge>
               </div>
               <div className="flex items-center gap-4">

@@ -1,6 +1,6 @@
 import { apiFetch } from "@/features/auth/authApi"
 
-import type { UserRoleSummary, UserSummary } from "./usersTypes"
+import type { CreateManagedUserInput, UserRoleSummary, UserSummary } from "./usersTypes"
 
 export async function listUsers(status?: string): Promise<UserSummary[]> {
   const params = status ? `?status=${encodeURIComponent(status)}` : ""
@@ -14,6 +14,14 @@ export async function listUsers(status?: string): Promise<UserSummary[]> {
 export async function activateUser(id: string): Promise<UserSummary> {
   return apiFetch<UserSummary>(`/users/${id}/activate`, {
     method: "PATCH",
+    includeCsrf: true,
+  })
+}
+
+export async function createManagedUser(input: CreateManagedUserInput): Promise<UserSummary> {
+  return apiFetch<UserSummary>("/users", {
+    method: "POST",
+    body: input,
     includeCsrf: true,
   })
 }

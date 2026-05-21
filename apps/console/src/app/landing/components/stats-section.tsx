@@ -26,7 +26,7 @@ const stats = [
   {
     icon: Zap,
     value: '< 3KB',
-    label: 'Tracking Pixel',
+    label: 'EUDORA',
     description: 'Blazing-fast and privacy-compliant for optimal site performance.'
   },
   {

@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Check, ChevronLeft, ChevronRight } from "lucide-react"
+import { ArrowRight, Check, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -9,7 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { fetchClassSections } from "@/features/education/educationSlice"
-import { createFamilyWizard } from "@/features/families/familiesSlice"
+import { buildFamilyWizardSuccessLinks } from "@/features/families/familyWizardFlow"
+import { clearFamilyWizardResult, createFamilyWizard } from "@/features/families/familiesSlice"
 import type { CreateFamilyWizardInput } from "@/features/families/familiesTypes"
 import { useAppDispatch, useAppSelector } from "@/store/hooks"
 
@@ -68,6 +70,7 @@ export function FamilyWizard() {
     () => classSections.find((section) => section.id === form.selectedClassSectionId),
     [classSections, form.selectedClassSectionId]
   )
+  const successLinks = useMemo(() => (lastCreated ? buildFamilyWizardSuccessLinks(lastCreated) : []), [lastCreated])
 
   function submitWizard() {
     const input: CreateFamilyWizardInput = {
@@ -101,6 +104,12 @@ export function FamilyWizard() {
     }
 
     void dispatch(createFamilyWizard(input))
+  }
+
+  function resetWizard() {
+    dispatch(clearFamilyWizardResult())
+    setForm(initialState)
+    setStep(0)
   }
 
   return (
@@ -210,7 +219,28 @@ export function FamilyWizard() {
       ) : null}
 
       {error ? <p className="text-destructive text-sm">{error}</p> : null}
-      {lastCreated ? <p className="text-sm text-green-600">Created {lastCreated.family.displayName}.</p> : null}
+      {lastCreated ? (
+        <div className="rounded-md border border-green-600/40 p-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-green-700 dark:text-green-400">
+            <Check className="size-4" />
+            Created {lastCreated.family.displayName}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {successLinks.map((link) => (
+              <Button key={link.href} asChild variant="outline" size="sm">
+                <Link href={link.href}>
+                  {link.label}
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            ))}
+            <Button type="button" variant="ghost" size="sm" onClick={resetWizard}>
+              <RotateCcw className="size-4" />
+              Create another family
+            </Button>
+          </div>
+        </div>
+      ) : null}
 
       <div className="flex justify-between">
         <Button type="button" variant="outline" onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0}>

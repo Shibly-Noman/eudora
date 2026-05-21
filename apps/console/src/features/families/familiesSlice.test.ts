@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import reducer, {
   addGuardianToFamily,
   addStudentToFamily,
+  clearFamilyWizardResult,
   createFamilyWizard,
   createGuardianLogin,
   fetchFamilyDetail,
@@ -55,6 +56,28 @@ describe("families slice", () => {
 
     expect(store.getState().families.lastCreated?.family.id).toBe("family_1")
     expect(store.getState().families.status).toBe("ready")
+  })
+
+  it("clears the guided family wizard result when starting another intake", async () => {
+    vi.mocked(familiesApi.createFamilyWizard).mockResolvedValue({
+      family: { id: "family_1", familyCode: "FAM-001", displayName: "Rahman Family" },
+      guardian: { id: "guardian_1", firstName: "Amina", lastName: "Rahman" },
+      student: { id: "student_1", studentNumber: "STU-001", firstName: "Nadia", lastName: "Rahman" },
+      primaryPlacement: null,
+    })
+    const store = makeStore()
+
+    await store.dispatch(
+      createFamilyWizard({
+        family: { familyCode: "FAM-001", displayName: "Rahman Family" },
+        guardian: { firstName: "Amina", lastName: "Rahman" },
+        student: { studentNumber: "STU-001", firstName: "Nadia", lastName: "Rahman" },
+        relationship: { relationshipType: "mother" },
+      })
+    )
+    store.dispatch(clearFamilyWizardResult())
+
+    expect(store.getState().families.lastCreated).toBeNull()
   })
 
   it("stores family detail workspace data", async () => {

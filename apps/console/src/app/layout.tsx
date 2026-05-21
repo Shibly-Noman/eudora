@@ -7,7 +7,7 @@ import { inter } from "@/lib/fonts";
 import { StoreProvider } from "@/store/provider";
 
 export const metadata: Metadata = {
-  title: "Tracking Pixel",
+  title: "Eudora",
   description: "A dashboard built with Next.js and shadcn/ui",
 };
 

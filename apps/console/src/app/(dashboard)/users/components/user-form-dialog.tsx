@@ -1,7 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import type { FormEvent } from "react"
+import { Plus } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -11,221 +15,183 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Plus } from "lucide-react"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { Label } from "@/components/ui/label"
+import { fetchRoles } from "@/features/rbac/rbacSlice"
+import type { RoleSummary } from "@/features/rbac/rbacTypes"
+import { createManagedUser } from "@/features/users/usersSlice"
+import { useAppDispatch, useAppSelector } from "@/store/hooks"
 
-const userFormSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  role: z.string().min(1, {
-    message: "Please select a role.",
-  }),
-  plan: z.string().min(1, {
-    message: "Please select a plan.",
-  }),
-  billing: z.string().min(1, {
-    message: "Please select a billing method.",
-  }),
-  status: z.string().min(1, {
-    message: "Please select a status.",
-  }),
-})
-
-type UserFormValues = z.infer<typeof userFormSchema>
-
-interface UserFormDialogProps {
-  onAddUser: (user: UserFormValues) => void
+type ManagedUserFormState = {
+  name: string
+  email: string
+  password: string
+  roleKeys: string[]
 }
 
-export function UserFormDialog({ onAddUser }: UserFormDialogProps) {
+const emptyForm: ManagedUserFormState = {
+  name: "",
+  email: "",
+  password: "",
+  roleKeys: [],
+}
+
+export function UserFormDialog() {
+  const dispatch = useAppDispatch()
+  const { items: roles, status: rolesStatus } = useAppSelector((state) => state.rbac)
+  const { saving, error } = useAppSelector((state) => state.users)
   const [open, setOpen] = useState(false)
+  const [form, setForm] = useState<ManagedUserFormState>(emptyForm)
 
-  const form = useForm<UserFormValues>({
-    resolver: zodResolver(userFormSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      role: "",
-      plan: "",
-      billing: "",
-      status: "",
-    },
-  })
+  useEffect(() => {
+    if (open && rolesStatus === "idle") {
+      void dispatch(fetchRoles())
+    }
+  }, [dispatch, open, rolesStatus])
 
-  function onSubmit(data: UserFormValues) {
-    onAddUser(data)
-    form.reset()
-    setOpen(false)
+  function toggleRole(roleKey: string, checked: boolean) {
+    setForm((current) => ({
+      ...current,
+      roleKeys: checked
+        ? [...current.roleKeys, roleKey].sort()
+        : current.roleKeys.filter((key) => key !== roleKey),
+    }))
   }
 
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    try {
+      await dispatch(
+        createManagedUser({
+          email: form.email.trim(),
+          name: form.name.trim() || undefined,
+          password: form.password,
+          roleKeys: form.roleKeys,
+        })
+      ).unwrap()
+      setForm(emptyForm)
+      setOpen(false)
+    } catch {
+      // Slice state owns the user-facing error message.
+    }
+  }
+
+  const canSubmit =
+    !saving &&
+    form.email.trim().length > 0 &&
+    form.password.length >= 12 &&
+    form.roleKeys.length > 0
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen)
+        if (!nextOpen) {
+          setForm(emptyForm)
+        }
+      }}
+    >
       <DialogTrigger asChild>
-        <Button className="cursor-pointer">
-          <Plus className="mr-2 h-4 w-4" />
-          Add New User
+        <Button>
+          <Plus className="size-4" />
+          New user
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Add New User</DialogTitle>
-          <DialogDescription>
-            Create a new user account. Click save when you&apos;re done.
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter full name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter email address" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="cursor-pointer w-full">
-                          <SelectValue placeholder="Select role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Admin">Admin</SelectItem>
-                        <SelectItem value="Author">Author</SelectItem>
-                        <SelectItem value="Editor">Editor</SelectItem>
-                        <SelectItem value="Maintainer">Maintainer</SelectItem>
-                        <SelectItem value="Subscriber">Subscriber</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="plan"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Plan</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="cursor-pointer w-full">
-                          <SelectValue placeholder="Select plan" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Basic">Basic</SelectItem>
-                        <SelectItem value="Professional">Professional</SelectItem>
-                        <SelectItem value="Enterprise">Enterprise</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+        <form className="space-y-5" onSubmit={(event) => void handleSubmit(event)}>
+          <DialogHeader>
+            <DialogTitle>Create managed user</DialogTitle>
+            <DialogDescription>
+              Managed accounts start active and must change their temporary password on first login.
+            </DialogDescription>
+          </DialogHeader>
+
+          {error ? <p className="text-destructive text-sm">{error}</p> : null}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="managed-user-name">Name</Label>
+              <Input
+                id="managed-user-name"
+                value={form.name}
+                onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
+                placeholder="Staff User"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="billing"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Billing</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="cursor-pointer w-full">
-                          <SelectValue placeholder="Select billing" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Auto Debit">Auto Debit</SelectItem>
-                        <SelectItem value="UPI">UPI</SelectItem>
-                        <SelectItem value="Paypal">Paypal</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="cursor-pointer w-full">
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Active">Active</SelectItem>
-                        <SelectItem value="Pending">Pending</SelectItem>
-                        <SelectItem value="Error">Error</SelectItem>
-                        <SelectItem value="Inactive">Inactive</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            <div className="space-y-2">
+              <Label htmlFor="managed-user-email">Email</Label>
+              <Input
+                id="managed-user-email"
+                type="email"
+                value={form.email}
+                onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
+                placeholder="staff@example.com"
+                required
               />
             </div>
-            <DialogFooter>
-              <Button type="submit" className="cursor-pointer">
-                Save User
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="managed-user-password">Temporary password</Label>
+            <Input
+              id="managed-user-password"
+              type="password"
+              value={form.password}
+              onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+              minLength={12}
+              required
+            />
+          </div>
+
+          <div className="space-y-3">
+            <Label>Roles</Label>
+            <div className="grid max-h-72 gap-2 overflow-y-auto rounded-md border p-3">
+              {roles.length ? (
+                roles.map((role) => (
+                  <RoleCheckbox
+                    key={role.id}
+                    role={role}
+                    checked={form.roleKeys.includes(role.key)}
+                    onCheckedChange={toggleRole}
+                  />
+                ))
+              ) : (
+                <p className="text-muted-foreground text-sm">
+                  {rolesStatus === "loading" ? "Loading roles..." : "No roles are available."}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button type="submit" disabled={!canSubmit}>
+              {saving ? "Creating..." : "Create user"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function RoleCheckbox({
+  role,
+  checked,
+  onCheckedChange,
+}: {
+  role: RoleSummary
+  checked: boolean
+  onCheckedChange: (roleKey: string, checked: boolean) => void
+}) {
+  return (
+    <label className="flex items-start gap-3 rounded-md p-2 hover:bg-muted/50">
+      <Checkbox checked={checked} onCheckedChange={(value) => onCheckedChange(role.key, value === true)} />
+      <span className="grid gap-1 text-sm">
+        <span className="font-medium">{role.name}</span>
+        <span className="text-muted-foreground">{role.key}</span>
+      </span>
+    </label>
   )
 }

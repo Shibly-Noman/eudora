@@ -12,6 +12,7 @@ import { activateUser, fetchUsers, rejectUser, setUserStatusFilter } from "@/fea
 import { useAppDispatch, useAppSelector } from "@/store/hooks"
 
 import { RoleAssignmentDialog } from "./components/role-assignment-dialog"
+import { UserFormDialog } from "./components/user-form-dialog"
 
 const statusLabels: Record<string, string> = {
   pending_verification: "Pending verification",
@@ -22,7 +23,7 @@ const statusLabels: Record<string, string> = {
 
 export default function UsersPage() {
   const dispatch = useAppDispatch()
-  const { items, filter, status, error } = useAppSelector((state) => state.users)
+  const { items, filter, status, error, actionUserIds } = useAppSelector((state) => state.users)
 
   useEffect(() => {
     void dispatch(fetchUsers(filter === "all" ? undefined : filter))
@@ -36,6 +37,9 @@ export default function UsersPage() {
           <p className="text-muted-foreground text-sm">Review public registrations and manage account status.</p>
         </div>
         <div className="flex gap-2">
+          <PermissionGate permissions={["users.create", "roles.read"]}>
+            <UserFormDialog />
+          </PermissionGate>
           <Select
             value={filter}
             onValueChange={(value) => dispatch(setUserStatusFilter(value))}
@@ -79,7 +83,7 @@ export default function UsersPage() {
           <TableBody>
             {items.length ? (
               items.map((user) => (
-                <TableRow key={user.id}>
+                <TableRow key={user.id} data-disabled={actionUserIds.includes(user.id) ? "true" : undefined}>
                   <TableCell>
                     <div className="flex flex-col">
                       <span className="font-medium">{user.name ?? user.email}</span>
@@ -117,13 +121,22 @@ export default function UsersPage() {
                       {user.status === "pending_verification" ? (
                         <>
                         <PermissionGate permissions={["users.activate"]}>
-                          <Button size="sm" onClick={() => void dispatch(activateUser(user.id))}>
+                          <Button
+                            size="sm"
+                            onClick={() => void dispatch(activateUser(user.id))}
+                            disabled={actionUserIds.includes(user.id)}
+                          >
                             <Check className="size-4" />
                             Activate
                           </Button>
                         </PermissionGate>
                         <PermissionGate permissions={["users.reject"]}>
-                          <Button size="sm" variant="outline" onClick={() => void dispatch(rejectUser(user.id))}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => void dispatch(rejectUser(user.id))}
+                            disabled={actionUserIds.includes(user.id)}
+                          >
                             <X className="size-4" />
                             Reject
                           </Button>

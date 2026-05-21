@@ -18,3 +18,10 @@ export type UserRoleSummary = {
   key: string
   name: string
 }
+
+export type CreateManagedUserInput = {
+  email: string
+  password: string
+  name?: string
+  roleKeys: string[]
+}

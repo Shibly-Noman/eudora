@@ -30,19 +30,19 @@ export function SidebarNotification() {
             <div>
               Welcome to{" "}
               <a 
-                href="https://PeakPixel.com" 
+                href="https://Eudora.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
               >
-                PeakPixel
+                Eudora
               </a>
             </div>
           </h3>
           <p className="text-sm text-muted-foreground dark:text-neutral-400 leading-relaxed">
             Explore our premium Shadcn UI{" "}
             <a 
-              href="https://PeakPixel.com/blocks" 
+              href="https://Eudora.com/blocks" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-primary underline"

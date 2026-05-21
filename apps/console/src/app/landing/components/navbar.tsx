@@ -85,7 +85,7 @@ export function LandingNavbar() {
           <Link href="https://peekpixel.com" className="flex items-center space-x-2 cursor-pointer" target='_blank' rel="noopener noreferrer">
             <Logo size={32} />
             <span className="font-bold">
-              PeakPixel
+              Eudora
             </span>
           </Link>
         </div>
@@ -162,7 +162,7 @@ export function LandingNavbar() {
                   <div className="p-2 bg-primary/10 rounded-lg">
                     <Logo size={16} />
                   </div>
-                  <SheetTitle className="text-lg font-semibold">PeakPixel</SheetTitle>
+                  <SheetTitle className="text-lg font-semibold">Eudora</SheetTitle>
                   <div className="ml-auto flex items-center gap-2">
                     <Button
                       variant="ghost"

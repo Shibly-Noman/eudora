@@ -162,7 +162,11 @@ export const updateRelationship = createAsyncThunk<
 const familiesSlice = createSlice({
   name: "families",
   initialState,
-  reducers: {},
+  reducers: {
+    clearFamilyWizardResult(state) {
+      state.lastCreated = null
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchFamilies.pending, (state) => {
@@ -322,4 +326,5 @@ function normalizeError(error: unknown): ApiError {
   return normalizeApiError(error)
 }
 
+export const { clearFamilyWizardResult } = familiesSlice.actions
 export default familiesSlice.reducer
