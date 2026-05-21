@@ -26,9 +26,11 @@
     "db:push": "corepack pnpm --filter @eudora/db db:push",
     "db:migrate": "corepack pnpm --filter @eudora/db db:migrate",
     "db:validate": "corepack pnpm --filter @eudora/db db:validate",
+    "db:seed": "corepack pnpm --filter @eudora/db seed",
     "openapi:generate": "corepack pnpm --filter @eudora/api openapi:generate",
     "api-client:generate": "corepack pnpm --filter @eudora/api-client generate",
     "api-client:check": "corepack pnpm --filter @eudora/api-client check",
+    "smoke:education": "node scripts/education-smoke.mjs",
     "ci:check": "corepack pnpm db:generate && corepack pnpm db:validate && corepack pnpm openapi:generate && corepack pnpm api-client:generate && corepack pnpm -r run lint && corepack pnpm -r run typecheck && corepack pnpm -r run test && corepack pnpm -r run build && corepack pnpm api-client:check",
     "ci:docker": "docker compose -f compose.yaml -f compose.ci.yaml up --build --abort-on-container-exit --exit-code-from check check"
   },

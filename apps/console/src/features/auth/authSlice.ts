@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 
 import * as authApi from "./authApi"
-import { ApiRequestError } from "./authApi"
+import { normalizeApiError } from "./authApi"
 import type {
   ApiError,
   ChangePasswordInput,
@@ -30,17 +30,6 @@ export const fetchCurrentUser = createAsyncThunk<
   try {
     return await authApi.fetchCurrentUser()
   } catch (error) {
-    const apiError = normalizeError(error)
-
-    if (apiError.status === 401) {
-      try {
-        await authApi.refreshSession()
-        return await authApi.fetchCurrentUser()
-      } catch (refreshError) {
-        return rejectWithValue(normalizeError(refreshError))
-      }
-    }
-
     return rejectWithValue(normalizeError(error))
   }
 })
@@ -153,21 +142,7 @@ const authSlice = createSlice({
 })
 
 function normalizeError(error: unknown): ApiError {
-  if (typeof error === "object" && error !== null && "status" in error && "message" in error) {
-    return error as ApiError
-  }
-
-  if (error instanceof ApiRequestError) {
-    return {
-      status: error.status,
-      message: error.message,
-    }
-  }
-
-  return {
-    status: 0,
-    message: "Network request failed",
-  }
+  return normalizeApiError(error)
 }
 
 export const { clearAuthError } = authSlice.actions

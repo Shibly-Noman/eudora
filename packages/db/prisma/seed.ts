@@ -1,5 +1,15 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { config as loadEnv } from "dotenv";
+
 import { createPrismaClient } from "../src/client.js";
+import { seedEducationDemo, type SeedEducationDemoPrisma } from "./seed-education-demo.js";
 import { seedSuperadmin } from "./seed-superadmin.js";
+
+loadEnv({
+  path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../.env")
+});
 
 const prisma = createPrismaClient();
 
@@ -13,7 +23,22 @@ const systemPermissions = [
   "roles.create",
   "roles.update",
   "roles.assignPermissions",
-  "audit.read"
+  "audit.read",
+  "education.read",
+  "education.manageStructure",
+  "families.read",
+  "families.create",
+  "families.update",
+  "students.read",
+  "students.create",
+  "students.update",
+  "guardians.read",
+  "guardians.create",
+  "guardians.update",
+  "enrollments.read",
+  "enrollments.manage",
+  "familyPortal.read",
+  "familyPortal.updateContact"
 ];
 
 const healthCheckCount = await prisma.healthCheck.count();
@@ -51,6 +76,21 @@ const superadminRole = await prisma.role.upsert({
   }
 });
 
+const guardianRole = await prisma.role.upsert({
+  where: { key: "guardian" },
+  update: {
+    name: "Guardian",
+    description: "Default guardian portal access.",
+    isSystem: true
+  },
+  create: {
+    key: "guardian",
+    name: "Guardian",
+    description: "Default guardian portal access.",
+    isSystem: true
+  }
+});
+
 await prisma.rolePermission.createMany({
   data: permissions.map((permission) => ({
     roleId: superadminRole.id,
@@ -59,6 +99,21 @@ await prisma.rolePermission.createMany({
   skipDuplicates: true
 });
 
+const familyPortalPermissions = permissions.filter((permission) =>
+  ["familyPortal.read", "familyPortal.updateContact"].includes(permission.key)
+);
+
+if (familyPortalPermissions.length > 0) {
+  await prisma.rolePermission.createMany({
+    data: familyPortalPermissions.map((permission) => ({
+      roleId: guardianRole.id,
+      permissionId: permission.id
+    })),
+    skipDuplicates: true
+  });
+}
+
 await seedSuperadmin(prisma);
+await seedEducationDemo(prisma as unknown as SeedEducationDemoPrisma);
 
 await prisma.$disconnect();

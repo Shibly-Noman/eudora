@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { ConflictException, ForbiddenException, UnauthorizedException } from "@nestjs/common";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AuthService } from "./auth.service.js";
 import { JwtService } from "./jwt.service.js";
@@ -16,7 +16,22 @@ const permissions = [
   "roles.create",
   "roles.update",
   "roles.assignPermissions",
-  "audit.read"
+  "audit.read",
+  "education.read",
+  "education.manageStructure",
+  "families.read",
+  "families.create",
+  "families.update",
+  "students.read",
+  "students.create",
+  "students.update",
+  "guardians.read",
+  "guardians.create",
+  "guardians.update",
+  "enrollments.read",
+  "enrollments.manage",
+  "familyPortal.read",
+  "familyPortal.updateContact"
 ];
 
 function createPrismaMock() {
@@ -56,6 +71,10 @@ describe("AuthService", () => {
 
   beforeEach(() => {
     process.env = { ...originalEnv };
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
   });
 
   it("creates public signup accounts as pending verification with a hashed password", async () => {
@@ -143,6 +162,57 @@ describe("AuthService", () => {
       data: expect.objectContaining({
         actorUserId: "user_1",
         event: "auth.login.rejected_status"
+      })
+    });
+  });
+
+  it("uses environment-configured token lifetimes when creating login sessions", async () => {
+    process.env.ACCESS_TOKEN_EXPIRES_IN_SECONDS = "120";
+    process.env.REFRESH_TOKEN_EXPIRES_IN_SECONDS = "360";
+
+    const prisma = createPrismaMock();
+    const passwordService = new PasswordService();
+    const jwtService = new JwtService();
+    const passwordHash = await passwordService.hash("password12345");
+    prisma.db.user.findUnique.mockResolvedValue({
+      id: "user_1",
+      email: "active@example.com",
+      name: "Active User",
+      passwordHash,
+      status: "active",
+      failedLoginCount: 0,
+      lockedUntil: null,
+      mustChangePassword: false
+    });
+    prisma.db.user.update.mockResolvedValue({
+      id: "user_1",
+      email: "active@example.com",
+      name: "Active User",
+      status: "active",
+      mustChangePassword: false
+    });
+
+    const service = new AuthService(prisma as never, passwordService, jwtService);
+
+    const result = await service.login({
+      email: "active@example.com",
+      password: "password12345",
+      userAgent: "vitest",
+      ipAddress: "127.0.0.1"
+    });
+
+    const accessPayload = jwtService.verify(result.tokens.accessToken);
+    const refreshPayload = jwtService.verify(result.tokens.refreshToken);
+
+    expect(result.tokens.accessTokenExpiresInSeconds).toBe(120);
+    expect(result.tokens.refreshTokenExpiresInSeconds).toBe(360);
+    expect(Number(accessPayload.exp) - Number(accessPayload.iat)).toBe(120);
+    expect(Number(refreshPayload.exp) - Number(refreshPayload.iat)).toBe(360);
+    expect(prisma.db.authSession.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        expiresAt: expect.any(Date),
+        refreshTokenHash: expect.any(String),
+        userId: "user_1"
       })
     });
   });

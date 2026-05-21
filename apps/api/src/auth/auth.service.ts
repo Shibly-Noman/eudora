@@ -59,10 +59,15 @@ const publicUserSelect = {
   mustChangePassword: true
 };
 
-const ACCESS_EXPIRES_IN_SECONDS = 15 * 60;
-const REFRESH_EXPIRES_IN_SECONDS = 30 * 24 * 60 * 60;
+const DEFAULT_ACCESS_EXPIRES_IN_SECONDS = 15 * 60;
+const DEFAULT_REFRESH_EXPIRES_IN_SECONDS = 30 * 24 * 60 * 60;
 const MAX_FAILED_LOGINS = 5;
 const LOCKOUT_MINUTES = 15;
+
+type TokenLifetimes = {
+  accessTokenExpiresInSeconds: number;
+  refreshTokenExpiresInSeconds: number;
+};
 
 @Injectable()
 export class AuthService {
@@ -323,10 +328,14 @@ export class AuthService {
       throw new ForbiddenException("Account is not active");
     }
 
-    const tokens = this.issueTokens({
-      userId: session.user.id,
-      email: session.user.email
-    });
+    const tokenLifetimes = getTokenLifetimes();
+    const tokens = this.issueTokens(
+      {
+        userId: session.user.id,
+        email: session.user.email
+      },
+      tokenLifetimes
+    );
 
     await this.prisma.db.authSession.update({
       where: { id: session.id },
@@ -335,7 +344,7 @@ export class AuthService {
         userAgent: input.userAgent ?? session.userAgent,
         ipAddress: input.ipAddress ?? session.ipAddress,
         lastUsedAt: new Date(),
-        expiresAt: new Date(Date.now() + REFRESH_EXPIRES_IN_SECONDS * 1000)
+        expiresAt: new Date(Date.now() + tokenLifetimes.refreshTokenExpiresInSeconds * 1000)
       }
     });
 
@@ -431,7 +440,8 @@ export class AuthService {
     userAgent: string | null;
     ipAddress: string | null;
   }): Promise<AuthTokens> {
-    const tokens = this.issueTokens(input);
+    const tokenLifetimes = getTokenLifetimes();
+    const tokens = this.issueTokens(input, tokenLifetimes);
 
     await this.prisma.db.authSession.create({
       data: {
@@ -439,14 +449,14 @@ export class AuthService {
         refreshTokenHash: hashToken(tokens.refreshToken),
         userAgent: input.userAgent,
         ipAddress: input.ipAddress,
-        expiresAt: new Date(Date.now() + REFRESH_EXPIRES_IN_SECONDS * 1000)
+        expiresAt: new Date(Date.now() + tokenLifetimes.refreshTokenExpiresInSeconds * 1000)
       }
     });
 
     return tokens;
   }
 
-  private issueTokens(input: { userId: string; email: string }): AuthTokens {
+  private issueTokens(input: { userId: string; email: string }, tokenLifetimes: TokenLifetimes): AuthTokens {
     return {
       accessToken: this.jwtService.sign(
         {
@@ -454,18 +464,18 @@ export class AuthService {
           email: input.email,
           typ: "access"
         },
-        { expiresInSeconds: ACCESS_EXPIRES_IN_SECONDS }
+        { expiresInSeconds: tokenLifetimes.accessTokenExpiresInSeconds }
       ),
       refreshToken: this.jwtService.sign(
         {
           sub: input.userId,
           typ: "refresh"
         },
-        { expiresInSeconds: REFRESH_EXPIRES_IN_SECONDS }
+        { expiresInSeconds: tokenLifetimes.refreshTokenExpiresInSeconds }
       ),
       csrfToken: this.jwtService.createOpaqueToken(),
-      accessTokenExpiresInSeconds: ACCESS_EXPIRES_IN_SECONDS,
-      refreshTokenExpiresInSeconds: REFRESH_EXPIRES_IN_SECONDS
+      accessTokenExpiresInSeconds: tokenLifetimes.accessTokenExpiresInSeconds,
+      refreshTokenExpiresInSeconds: tokenLifetimes.refreshTokenExpiresInSeconds
     };
   }
 
@@ -499,6 +509,26 @@ export class AuthService {
       }
     });
   }
+}
+
+function getTokenLifetimes(): TokenLifetimes {
+  return {
+    accessTokenExpiresInSeconds: readPositiveIntegerEnv(
+      "ACCESS_TOKEN_EXPIRES_IN_SECONDS",
+      DEFAULT_ACCESS_EXPIRES_IN_SECONDS
+    ),
+    refreshTokenExpiresInSeconds: readPositiveIntegerEnv(
+      "REFRESH_TOKEN_EXPIRES_IN_SECONDS",
+      DEFAULT_REFRESH_EXPIRES_IN_SECONDS
+    )
+  };
+}
+
+function readPositiveIntegerEnv(name: string, fallback: number): number {
+  const rawValue = process.env[name];
+  const value = Number.parseInt(rawValue ?? "", 10);
+
+  return Number.isFinite(value) && value > 0 ? value : fallback;
 }
 
 function normalizeEmail(email: string): string {

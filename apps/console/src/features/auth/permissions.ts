@@ -1,7 +1,12 @@
 export type Permission = string
 
 export const protectedRoutes: Record<string, Permission[]> = {
+  "/education/setup": ["education.manageStructure"],
+  "/education": ["education.read"],
+  "/families": ["families.read"],
+  "/my-family": ["familyPortal.read"],
   "/roles": ["roles.read"],
+  "/students": ["students.read"],
   "/users": ["users.read"],
 }
 

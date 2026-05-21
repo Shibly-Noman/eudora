@@ -1,10 +1,12 @@
 import { Controller, Get, Inject } from "@nestjs/common";
 import { ApiOkResponse, ApiServiceUnavailableResponse, ApiTags } from "@nestjs/swagger";
 
+import { RawResponse } from "../common/http/raw-response.decorator.js";
 import { HealthResponseDto, UnhealthyResponseDto } from "./health.dto.js";
 import { HealthService, type HealthResponse } from "./health.service.js";
 
 @ApiTags("health")
+@RawResponse()
 @Controller("health")
 export class HealthController {
   constructor(@Inject(HealthService) private readonly healthService: HealthService) {}

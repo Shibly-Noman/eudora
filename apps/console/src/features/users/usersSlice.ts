@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 
 import type { ApiError } from "@/features/auth/authTypes"
-import { ApiRequestError } from "@/features/auth/authApi"
+import { normalizeApiError } from "@/features/auth/authApi"
 
 import * as usersApi from "./usersApi"
 import type { UserRoleSummary, UserSummary } from "./usersTypes"
@@ -107,21 +107,7 @@ const usersSlice = createSlice({
 })
 
 function normalizeError(error: unknown): ApiError {
-  if (typeof error === "object" && error !== null && "status" in error && "message" in error) {
-    return error as ApiError
-  }
-
-  if (error instanceof ApiRequestError) {
-    return {
-      status: error.status,
-      message: error.message,
-    }
-  }
-
-  return {
-    status: 0,
-    message: "Network request failed",
-  }
+  return normalizeApiError(error)
 }
 
 export const { setUserStatusFilter } = usersSlice.actions

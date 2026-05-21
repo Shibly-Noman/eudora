@@ -17,3 +17,45 @@ export const AccountStatus = {
 } as const
 
 export type AccountStatus = (typeof AccountStatus)[keyof typeof AccountStatus]
+
+
+export const EducationRecordStatus = {
+  active: 'active',
+  inactive: 'inactive',
+  archived: 'archived'
+} as const
+
+export type EducationRecordStatus = (typeof EducationRecordStatus)[keyof typeof EducationRecordStatus]
+
+
+export const StudentStatus = {
+  prospective: 'prospective',
+  active: 'active',
+  withdrawn: 'withdrawn',
+  graduated: 'graduated',
+  archived: 'archived'
+} as const
+
+export type StudentStatus = (typeof StudentStatus)[keyof typeof StudentStatus]
+
+
+export const GuardianRelationshipType = {
+  mother: 'mother',
+  father: 'father',
+  guardian: 'guardian',
+  grandparent: 'grandparent',
+  sponsor: 'sponsor',
+  other: 'other'
+} as const
+
+export type GuardianRelationshipType = (typeof GuardianRelationshipType)[keyof typeof GuardianRelationshipType]
+
+
+export const EnrollmentStatus = {
+  active: 'active',
+  completed: 'completed',
+  withdrawn: 'withdrawn',
+  dropped: 'dropped'
+} as const
+
+export type EnrollmentStatus = (typeof EnrollmentStatus)[keyof typeof EnrollmentStatus]

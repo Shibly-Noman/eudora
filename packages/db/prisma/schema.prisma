@@ -39,6 +39,8 @@ model User {
   roles              UserRole[]
   sessions           AuthSession[]
   auditLogs          AuditLog[]    @relation("AuditActor")
+  guardianProfile    GuardianProfile?
+  studentProfile     StudentProfile?
 }
 
 model Role {
@@ -122,4 +124,302 @@ model AuditLog {
   @@index([actorUserId])
   @@index([event])
   @@index([createdAt])
+}
+
+enum EducationRecordStatus {
+  active
+  inactive
+  archived
+}
+
+enum StudentStatus {
+  prospective
+  active
+  withdrawn
+  graduated
+  archived
+}
+
+enum GuardianRelationshipType {
+  mother
+  father
+  guardian
+  grandparent
+  sponsor
+  other
+}
+
+enum EnrollmentStatus {
+  active
+  completed
+  withdrawn
+  dropped
+}
+
+model Campus {
+  id           String                @id @default(cuid())
+  code         String                @unique
+  name         String
+  phone        String?
+  email        String?
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  state        String?
+  postalCode   String?
+  country      String?
+  status       EducationRecordStatus @default(active)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  programs      Program[]
+  classSections ClassSection[]
+  courseClasses CourseClass[]
+}
+
+model Program {
+  id          String                @id @default(cuid())
+  campusId    String
+  code        String
+  name        String
+  description String?
+  status      EducationRecordStatus @default(active)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  campus        Campus         @relation(fields: [campusId], references: [id], onDelete: Cascade)
+  classSections ClassSection[]
+  courseClasses CourseClass[]
+
+  @@unique([campusId, code])
+  @@index([campusId])
+}
+
+model AcademicYear {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  startsOn  DateTime
+  endsOn    DateTime
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  terms             Term[]
+  classSections     ClassSection[]
+  courseClasses     CourseClass[]
+  primaryPlacements StudentPrimaryPlacement[]
+}
+
+model Term {
+  id             String   @id @default(cuid())
+  academicYearId String
+  code           String
+  name           String
+  startsOn       DateTime
+  endsOn         DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  academicYear AcademicYear  @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  classSections ClassSection[]
+  courseClasses CourseClass[]
+
+  @@unique([academicYearId, code])
+  @@index([academicYearId])
+}
+
+model ClassSection {
+  id             String                @id @default(cuid())
+  campusId       String
+  programId      String
+  academicYearId String
+  termId         String?
+  code           String
+  name           String
+  capacity       Int?
+  status         EducationRecordStatus @default(active)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  campus       Campus       @relation(fields: [campusId], references: [id], onDelete: Cascade)
+  program      Program      @relation(fields: [programId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  term         Term?        @relation(fields: [termId], references: [id], onDelete: SetNull)
+
+  primaryPlacements StudentPrimaryPlacement[]
+
+  @@unique([campusId, academicYearId, code])
+  @@index([programId])
+  @@index([academicYearId])
+}
+
+model CourseClass {
+  id             String                @id @default(cuid())
+  campusId       String
+  programId      String
+  academicYearId String
+  termId         String?
+  code           String
+  name           String
+  capacity       Int?
+  status         EducationRecordStatus @default(active)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  campus       Campus       @relation(fields: [campusId], references: [id], onDelete: Cascade)
+  program      Program      @relation(fields: [programId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  term         Term?        @relation(fields: [termId], references: [id], onDelete: SetNull)
+
+  enrollments StudentCourseEnrollment[]
+
+  @@unique([campusId, academicYearId, code])
+  @@index([programId])
+  @@index([academicYearId])
+}
+
+model Family {
+  id           String                @id @default(cuid())
+  familyCode   String                @unique
+  displayName  String
+  primaryEmail String?
+  primaryPhone String?
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  state        String?
+  postalCode   String?
+  country      String?
+  status       EducationRecordStatus @default(active)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  guardians FamilyGuardian[]
+  students  FamilyStudent[]
+}
+
+model GuardianProfile {
+  id        String                @id @default(cuid())
+  userId    String?               @unique
+  firstName String
+  lastName  String
+  email     String?
+  phone     String?
+  status    EducationRecordStatus @default(active)
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  user     User?                         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  families FamilyGuardian[]
+  students GuardianStudentRelationship[]
+
+  @@index([email])
+  @@index([phone])
+}
+
+model StudentProfile {
+  id            String        @id @default(cuid())
+  userId        String?       @unique
+  studentNumber String        @unique
+  firstName     String
+  lastName      String
+  dateOfBirth   DateTime?
+  gender        String?
+  status        StudentStatus @default(active)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user              User?                         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  families          FamilyStudent[]
+  guardians         GuardianStudentRelationship[]
+  primaryPlacements StudentPrimaryPlacement[]
+  courseEnrollments StudentCourseEnrollment[]
+
+  @@index([lastName, firstName])
+}
+
+model FamilyGuardian {
+  familyId   String
+  guardianId String
+  isPrimary  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  family   Family          @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  guardian GuardianProfile @relation(fields: [guardianId], references: [id], onDelete: Cascade)
+
+  @@id([familyId, guardianId])
+  @@index([guardianId])
+}
+
+model FamilyStudent {
+  familyId           String
+  studentId          String
+  isPrimaryHousehold Boolean  @default(false)
+  livesWithFamily    Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  family  Family         @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([familyId, studentId])
+  @@index([studentId])
+}
+
+model GuardianStudentRelationship {
+  id                  String                   @id @default(cuid())
+  guardianId          String
+  studentId           String
+  relationshipType    GuardianRelationshipType
+  isPrimaryContact    Boolean                  @default(false)
+  isEmergencyContact  Boolean                  @default(false)
+  isPickupAuthorized  Boolean                  @default(false)
+  isBillingResponsible Boolean                 @default(false)
+  hasPortalAccess     Boolean                  @default(false)
+  canApproveRequests  Boolean                  @default(false)
+  notes               String?
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+
+  guardian GuardianProfile @relation(fields: [guardianId], references: [id], onDelete: Cascade)
+  student  StudentProfile  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([guardianId, studentId])
+  @@index([studentId])
+}
+
+model StudentPrimaryPlacement {
+  id             String           @id @default(cuid())
+  studentId      String
+  classSectionId String
+  academicYearId String
+  startsOn       DateTime
+  endsOn         DateTime?
+  status         EnrollmentStatus @default(active)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  student      StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classSection ClassSection   @relation(fields: [classSectionId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear   @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, academicYearId, status])
+  @@index([classSectionId])
+}
+
+model StudentCourseEnrollment {
+  id            String           @id @default(cuid())
+  studentId     String
+  courseClassId String
+  enrolledOn    DateTime
+  endedOn       DateTime?
+  status        EnrollmentStatus @default(active)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  student     StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseClass CourseClass    @relation(fields: [courseClassId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, courseClassId])
+  @@index([courseClassId])
 }

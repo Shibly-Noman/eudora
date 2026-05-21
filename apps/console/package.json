@@ -7,7 +7,7 @@
     "dev:docker": "next dev --hostname 0.0.0.0",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint src/features src/store \"src/app/(auth)\" \"src/app/(dashboard)/layout.tsx\" \"src/app/(dashboard)/users/page.tsx\" \"src/app/(dashboard)/users/components/role-assignment-dialog.tsx\" \"src/app/(dashboard)/roles/page.tsx\" src/components/app-sidebar.tsx src/components/nav-user.tsx",
+    "lint": "eslint src/features src/store \"src/app/(auth)\" \"src/app/(dashboard)/layout.tsx\" \"src/app/(dashboard)/users/page.tsx\" \"src/app/(dashboard)/users/components/role-assignment-dialog.tsx\" \"src/app/(dashboard)/roles/page.tsx\" \"src/app/(dashboard)/education\" \"src/app/(dashboard)/families\" \"src/app/(dashboard)/students\" \"src/app/(dashboard)/my-family/page.tsx\" src/components/app-sidebar.tsx src/components/nav-user.tsx",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

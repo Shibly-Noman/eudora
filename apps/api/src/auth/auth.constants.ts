@@ -12,7 +12,22 @@ export const SYSTEM_PERMISSIONS = [
   "roles.create",
   "roles.update",
   "roles.assignPermissions",
-  "audit.read"
+  "audit.read",
+  "education.read",
+  "education.manageStructure",
+  "families.read",
+  "families.create",
+  "families.update",
+  "students.read",
+  "students.create",
+  "students.update",
+  "guardians.read",
+  "guardians.create",
+  "guardians.update",
+  "enrollments.read",
+  "enrollments.manage",
+  "familyPortal.read",
+  "familyPortal.updateContact"
 ] as const;
 
 export type SystemPermission = (typeof SYSTEM_PERMISSIONS)[number];

@@ -81,3 +81,73 @@ export type AuthSession = Prisma.AuthSessionModel
  * 
  */
 export type AuditLog = Prisma.AuditLogModel
+/**
+ * Model Campus
+ * 
+ */
+export type Campus = Prisma.CampusModel
+/**
+ * Model Program
+ * 
+ */
+export type Program = Prisma.ProgramModel
+/**
+ * Model AcademicYear
+ * 
+ */
+export type AcademicYear = Prisma.AcademicYearModel
+/**
+ * Model Term
+ * 
+ */
+export type Term = Prisma.TermModel
+/**
+ * Model ClassSection
+ * 
+ */
+export type ClassSection = Prisma.ClassSectionModel
+/**
+ * Model CourseClass
+ * 
+ */
+export type CourseClass = Prisma.CourseClassModel
+/**
+ * Model Family
+ * 
+ */
+export type Family = Prisma.FamilyModel
+/**
+ * Model GuardianProfile
+ * 
+ */
+export type GuardianProfile = Prisma.GuardianProfileModel
+/**
+ * Model StudentProfile
+ * 
+ */
+export type StudentProfile = Prisma.StudentProfileModel
+/**
+ * Model FamilyGuardian
+ * 
+ */
+export type FamilyGuardian = Prisma.FamilyGuardianModel
+/**
+ * Model FamilyStudent
+ * 
+ */
+export type FamilyStudent = Prisma.FamilyStudentModel
+/**
+ * Model GuardianStudentRelationship
+ * 
+ */
+export type GuardianStudentRelationship = Prisma.GuardianStudentRelationshipModel
+/**
+ * Model StudentPrimaryPlacement
+ * 
+ */
+export type StudentPrimaryPlacement = Prisma.StudentPrimaryPlacementModel
+/**
+ * Model StudentCourseEnrollment
+ * 
+ */
+export type StudentCourseEnrollment = Prisma.StudentCourseEnrollmentModel

@@ -16,10 +16,13 @@ import {
   LayoutTemplate,
   Users,
   ShieldCheck,
+  Building2,
+  GraduationCap,
+  Home,
+  School,
 } from "lucide-react"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
-import { SidebarNotification } from "@/components/sidebar-notification"
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
@@ -54,6 +57,47 @@ const data = {
           title: "Dashboard 2",
           url: "/dashboard-2",
           icon: LayoutPanelLeft,
+        },
+      ],
+    },
+    {
+      label: "Education",
+      items: [
+        {
+          title: "Setup",
+          url: "/education/setup",
+          icon: School,
+          requiredPermissions: ["education.manageStructure"],
+        },
+        {
+          title: "Campuses",
+          url: "/education/campuses",
+          icon: Building2,
+          requiredPermissions: ["education.read"],
+        },
+        {
+          title: "Classes",
+          url: "/education/classes",
+          icon: GraduationCap,
+          requiredPermissions: ["education.read"],
+        },
+        {
+          title: "Families",
+          url: "/families",
+          icon: Home,
+          requiredPermissions: ["families.read"],
+        },
+        {
+          title: "Students",
+          url: "/students",
+          icon: Users,
+          requiredPermissions: ["students.read"],
+        },
+        {
+          title: "My Family",
+          url: "/my-family",
+          icon: Home,
+          requiredPermissions: ["familyPortal.read"],
         },
       ],
     },
@@ -257,7 +301,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         })}
       </SidebarContent>
       <SidebarFooter>
-        <SidebarNotification />
         <NavUser user={displayUser} />
       </SidebarFooter>
     </Sidebar>

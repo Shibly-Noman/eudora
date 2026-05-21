@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 
-import { ApiRequestError } from "@/features/auth/authApi"
+import { normalizeApiError } from "@/features/auth/authApi"
 import type { ApiError } from "@/features/auth/authTypes"
 
 import * as rbacApi from "./rbacApi"
@@ -131,21 +131,7 @@ function compareRoles(left: RoleSummary, right: RoleSummary): number {
 }
 
 function normalizeError(error: unknown): ApiError {
-  if (typeof error === "object" && error !== null && "status" in error && "message" in error) {
-    return error as ApiError
-  }
-
-  if (error instanceof ApiRequestError) {
-    return {
-      status: error.status,
-      message: error.message,
-    }
-  }
-
-  return {
-    status: 0,
-    message: "Network request failed",
-  }
+  return normalizeApiError(error)
 }
 
 export default rbacSlice.reducer

@@ -31,7 +31,16 @@ export type ChangePasswordInput = {
   newPassword: string
 }
 
+export type ApiErrorDetail = {
+  field?: string
+  code: string
+  message: string
+}
+
 export type ApiError = {
   status: number
   message: string
+  code?: string
+  errors?: ApiErrorDetail[]
+  requestId?: string
 }
