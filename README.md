@@ -1,244 +1,256 @@
-# Eudora
+# Eudora Next Phase Development Plan
 
-Lean TypeScript full-stack monorepo scaffold using Corepack, pnpm, Turborepo, Next.js, NestJS, Prisma, PostgreSQL, and Docker Compose.
+This document is the working plan for the next phase of Eudora. The current education foundation already covers authentication/RBAC, education structure, families, guardians, students, enrollments, and a guardian portal. The next phase strengthens the Student module first, then builds toward learning plans, goals, rubrics, and assessment.
 
-## Requirements
+## Direction
 
-- Node.js 24.15.0
-- Corepack
-- Docker with Compose
+Eudora should treat the student workspace as the center of academic and developmental tracking.
 
-## Setup
+The domain boundaries are:
 
-For the usual local development loop, run PostgreSQL in Docker and run the apps on your machine:
+- `StudentsModule` owns student profile read/update workflows and the student workspace API.
+- `FamiliesModule` owns households, guardians, and guardian-student relationships.
+- `EnrollmentsModule` owns primary placement and course enrollment actions.
+- Future learning-plan and assessment features attach to the student workspace.
+- Rubric templates belong to a reusable template/catalog area, not directly under a student.
 
-```bash
-corepack pnpm install
-corepack pnpm dev:setup
-corepack pnpm dev
-```
+For now, student creation stays inside family workflows. Standalone student creation can be added later for admissions, imports, or registrar workflows.
 
-The API runs on `http://localhost:3001`, Swagger UI is available at `http://localhost:3001/docs`, and the minimal web shell runs on `http://localhost:3000`.
+## Phase 1: Student Module Backend Cleanup
 
-## Docker App Runtime
+Goal: make `StudentProfile` a first-class backend module without changing the public API routes.
 
-To run PostgreSQL, the API, and the web shell together in Docker:
-
-```bash
-corepack pnpm docker:start
-```
-
-Useful Docker shortcuts:
-
-```bash
-corepack pnpm docker:ps
-corepack pnpm docker:logs
-corepack pnpm docker:stop
-```
-
-The Docker app runtime exposes the same ports: web on `http://localhost:3000`, API health on `http://localhost:3001/health`, and Swagger UI on `http://localhost:3001/docs`.
-
-
-
-I’m using the writing-plans skill to create the implementation plan.
-
-**Recommended Implementation Plan**
-Build this as a **thin end-to-end EducationOS slice**, not as isolated tables.
-
-**Phase 1: Domain Schema**
-Add Prisma models:
-
-- `Campus`
-- `Program`
-- `AcademicYear`
-- `Term`
-- `ClassSection`
-- `CourseClass`
-- `Family`
-- `GuardianProfile`
-- `StudentProfile`
-- `FamilyGuardian`
-- `FamilyStudent`
-- `GuardianStudentRelationship`
-- `StudentPrimaryPlacement`
-- `StudentCourseEnrollment`
-
-Add enums:
-
-- `EducationRecordStatus`: `active`, `inactive`, `archived`
-- `StudentStatus`: `prospective`, `active`, `withdrawn`, `graduated`, `archived`
-- `GuardianRelationshipType`: `mother`, `father`, `guardian`, `grandparent`, `sponsor`, `other`
-- `EnrollmentStatus`: `active`, `completed`, `withdrawn`, `dropped`
-
-Key constraints:
-
-- Student can have optional `userId`.
-- Guardian can have optional `userId`.
-- One active primary placement per student per academic year.
-- Multiple course enrollments allowed.
-
-**Phase 2: Permissions**
-Seed immutable permissions:
-
-```ts
-education.read
-education.manageStructure
-
-families.read
-families.create
-families.update
-
-students.read
-students.create
-students.update
-
-guardians.read
-guardians.create
-guardians.update
-
-enrollments.read
-enrollments.manage
-
-familyPortal.read
-```
-
-Superadmin gets all. Later we can create school staff roles like `Registrar`, `Campus Admin`, `Teacher`, `Guardian`.
-
-**Phase 3: API Modules**
-Create API modules:
+Implement a dedicated `StudentsModule`:
 
 ```text
-education-structure
-  campuses
-  programs
-  academic-years
-  terms
-  class-sections
-  course-classes
-
-families
-  families
-  guardians
-  students
-  guardian-student relationships
-
-enrollments
-  primary placements
-  course enrollments
-
-family-portal
-  read-only guardian-scoped views
+apps/api/src/students/
+  students.module.ts
+  students.controller.ts
+  students.service.ts
+  students.dto.ts
+  students.service.test.ts
 ```
 
-Initial endpoints:
+Move these routes out of the family controller:
 
 ```text
-GET/POST/PATCH /campuses
-GET/POST/PATCH /programs
-GET/POST/PATCH /academic-years
-GET/POST/PATCH /class-sections
-GET/POST/PATCH /course-classes
-
-GET/POST/PATCH /families
-GET/POST/PATCH /guardians
-GET/POST/PATCH /students
-
-POST /families/:id/guardians
-POST /families/:id/students
-POST /students/:id/guardians
-
-POST /students/:id/primary-placement
-POST /students/:id/course-enrollments
-
-GET /family-portal/me
+GET /students
+GET /students/:id
+PATCH /students/:id
 ```
 
-**Phase 4: Admin Console**
-Add dashboard navigation group: **Education**.
+Move these behaviors into `StudentsService`:
 
-First admin pages:
+- list/search/paginate student profiles
+- compose student detail with family links, guardian links, placement history, and course enrollments
+- update core student profile fields
+- record `students.updated` audit events
+
+Keep these workflows in the family module:
+
+- `POST /families/wizard`
+- `POST /families/:id/students`
+- `POST /families/:id/guardians`
+- `PATCH /guardian-student-relationships/:id`
+
+Keep these workflows in the enrollments module:
+
+- `PUT /students/:studentId/primary-placement`
+- `POST /students/:studentId/course-enrollments`
+
+## Phase 2: Student Workspace Shape
+
+Goal: make the student detail experience ready for learning plans and assessment.
+
+The student workspace should be organized around tabs:
+
+- Overview: identity, status, student number, DOB, gender
+- Academic: active placement, placement history, course enrollments
+- Family and Guardians: households, guardians, responsibility flags, portal access
+- Learning Profile: strengths, needs, support notes, active plan summary
+- Activity: student-related audit/history events
+
+The first UI pass can keep the existing `/students/:id` route and reorganize the current page into these tabs. A separate Learning Plan page can come later when the model becomes larger.
+
+## Phase 3: Learning Plan Foundation
+
+Goal: add a student-centered container for individualized support and developmental tracking.
+
+Recommended model direction:
 
 ```text
-/education/campuses
-/education/programs
-/education/academic-years
-/education/classes
-/families
-/students
+StudentLearningPlan
+StudentLearningGoal
 ```
 
-Admin workflow:
+Rules for v1:
 
-1. Create campus.
-2. Create program.
-3. Create academic year.
-4. Create class section.
-5. Create family.
-6. Add guardian.
-7. Add student.
-8. Link guardian to student with responsibility flags.
-9. Assign student primary placement.
-10. Optionally enroll student in course classes.
+- one active learning plan per student
+- goal progress is manually judged by staff
+- Eudora can later calculate suggested progress from linked rubric item ratings
+- guardians only see goal summaries that staff explicitly mark as guardian-visible
+- raw notes, internal evidence, and assessment entries stay internal by default
 
-**Phase 5: Guardian Portal**
-Guardian logs in using existing auth.
+Learning goals should support:
 
-Read-only page:
+- title
+- description
+- domain or tags
+- priority
+- status
+- staff-only notes
+- guardian-visible summary
+- manual progress status
+
+## Phase 4: Rubric Template Catalog
+
+Goal: define reusable rubric templates separately from student-assigned rubrics.
+
+Rubric templates are reusable school assets:
 
 ```text
-/my-family
+RubricTemplate
+RubricItemTemplate
+RatingScale
+RatingScaleLevel
 ```
 
-Shows:
+Rubric templates are not always under a student. They become student-specific only after assignment.
 
-- family household info
-- linked guardians
-- linked students
-- each student’s primary class/section
-- optional course enrollments
-- guardian’s own responsibility flags
-
-Important: guardian portal endpoints must not trust frontend filters. API scopes by `request.user.id -> GuardianProfile -> relationships`.
-
-**Phase 6: Testing**
-Backend tests first:
-
-- schema relationship behavior
-- create/list/update campus/program/classes
-- create family with guardians/students
-- assign guardian-student responsibilities
-- assign primary placement
-- prevent duplicate active primary placement
-- guardian portal returns only linked family data
-
-Frontend tests:
-
-- permission route metadata
-- education navigation visibility
-- slices for family/student/education structure state
-
-**Phase 7: OpenAPI + Docker**
-After backend endpoints:
+Example:
 
 ```text
-openapi:generate
-api-client:generate
-api-client:check
+RubricTemplate: Morning Routine Rubric
+RubricItemTemplate:
+  - Unpacks bag independently
+  - Prepares desk materials
+  - Starts first activity
 ```
 
-Then verify Docker:
+When assigned to a student, Eudora copies the template into a student-owned rubric:
 
 ```text
-docker compose up -d --build api console
+StudentRubric
+StudentRubricItem
+StudentRubricProgressEntry
 ```
 
-**Build Order I Recommend**
-1. DB schema + permissions.
-2. Education structure API.
-3. Family/student/guardian API.
-4. Enrollment API.
-5. Console admin screens.
-6. Guardian portal read-only screen.
-7. Polish validations and search/filtering.
+This snapshot behavior keeps each student's plan stable even if the reusable template changes later.
 
-That order gives us usable value early without overbuilding admissions, billing, attendance, grades, or documents yet. Those become later modules once this core identity and placement layer is stable.
+## Phase 5: Goals and Rubrics Integration
+
+Goal: use Option C, where goals and rubric items are separate but linkable.
+
+The model should support:
+
+```text
+StudentLearningGoal
+StudentRubricItem
+StudentRubricItemGoalLink
+```
+
+This lets one rubric item support one or more goals.
+
+Example:
+
+```text
+Rubric item:
+Uses words or signals to request help.
+
+Linked goals:
+- Improve communication
+- Increase classroom independence
+```
+
+For v1:
+
+- progress entries are recorded against rubric items
+- goal progress remains manually set by staff
+- linked rubric ratings provide evidence
+- Eudora may later suggest goal progress from linked rubric ratings
+
+## Phase 6: Goal and Rubric Template Assignment
+
+Goal: let staff combine reusable goal templates and rubric templates when assigning a plan to a student.
+
+Template assets should be reusable separately:
+
+```text
+GoalTemplateSet
+GoalTemplate
+
+RubricTemplate
+RubricItemTemplate
+```
+
+When assigning to a student:
+
+1. Staff selects one or more goal template sets.
+2. Staff selects a rubric template.
+3. Eudora copies goals and rubric items into the student plan.
+4. Eudora suggests links by matching domains or tags.
+5. Staff reviews and adjusts suggested links before saving.
+
+This keeps templates modular and avoids forcing every learning plan template to bundle one fixed rubric.
+
+## Phase 7: Guardian Visibility
+
+Goal: expose helpful learning progress to guardians without leaking internal notes.
+
+Guardian portal v1 should show goal summaries only:
+
+```text
+Goal: Build classroom independence
+Summary: Mina is becoming more confident with morning routines.
+Next step: Continue using a visual checklist.
+```
+
+Do not show by default:
+
+- raw assessment evidence
+- internal staff notes
+- unpublished progress entries
+- every rubric rating
+
+Later, Eudora can add published report snapshots for more polished guardian communication.
+
+## Validation Plan
+
+Backend validation:
+
+- `StudentsModule` routes preserve current `/students` API behavior.
+- family workflows still create students.
+- enrollment workflows still attach placement and course enrollment records.
+- student detail still returns family, guardian, placement, and course enrollment context.
+- future learning-plan tables are added only after the Student module is clean.
+
+Frontend validation:
+
+- existing student list and detail pages continue to work after backend extraction.
+- student detail can be reorganized into tabs without changing the route.
+- learning profile tab can be added before full rubric/assessment implementation.
+
+Generation and checks:
+
+```text
+corepack pnpm --filter @eudora/api test
+corepack pnpm --filter @eudora/api typecheck
+corepack pnpm openapi:generate
+corepack pnpm api-client:generate
+corepack pnpm api-client:check
+```
+
+## Build Order
+
+Recommended order for the next phase:
+
+1. Extract dedicated backend `StudentsModule`.
+2. Reorganize student workspace into tabs.
+3. Add learning profile foundation.
+4. Add learning plan and goal records.
+5. Add rubric template catalog.
+6. Add student-assigned rubrics.
+7. Add goal-rubric links.
+8. Add progress entries.
+9. Add guardian-visible goal summaries.
+10. Later: suggested progress calculation and published report snapshots.
